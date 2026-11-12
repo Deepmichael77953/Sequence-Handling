@@ -1,0 +1,15 @@
+File: sample_dataset.fasta
+Total sequences: 2
+-----------------------------------------------------------------
+[1] NC_001422.1 Enterobacteria phage phiX174, partial genome
+    Length      : 350 bp
+    GC Content  : 42.57%
+    Composition : A=99 (28.3%), T=102 (29.1%), G=85 (24.3%), C=64 (18.3%)
+
+[2] NC_001416.1 Enterobacteria phage lambda, partial genome
+    Length      : 350 bp
+    GC Content  : 52.86%
+    Composition : A=81 (23.1%), T=84 (24.0%), G=104 (29.7%), C=81 (23.1%)
+
+-----------------------------------------------------------------
+Overall Summary: 700 total bp | Mean GC Content: 47.71%
