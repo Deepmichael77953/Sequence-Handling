@@ -1,0 +1,90 @@
+import sys
+from collections import Counter
+
+
+def parse_fasta(filepath):
+    header = None
+    seq_chunks = []
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith(">"):
+                if header is not None:
+                    yield header, "".join(seq_chunks).upper()
+                header = line[1:].strip()
+                seq_chunks = []
+            else:
+                seq_chunks.append(line)
+
+        if header is not None:
+            yield header, "".join(seq_chunks).upper()
+
+
+def analyze_sequence(seq):
+    length = len(seq)
+    counts = Counter(seq)
+    a_count = counts.get("A", 0)
+    t_count = counts.get("T", 0)
+    g_count = counts.get("G", 0)
+    c_count = counts.get("C", 0)
+    other_count = length - (a_count + t_count + g_count + c_count)
+    gc_content = ((g_count + c_count) / length * 100) if length > 0 else 0.0
+
+    return {
+        "length": length,
+        "gc_percent": gc_content,
+        "A": a_count,
+        "T": t_count,
+        "G": g_count,
+        "C": c_count,
+        "Other": other_count,
+    }
+
+
+def main():
+    filepath = sys.argv[1] if len(sys.argv) > 1 else "sample_dataset.fasta"
+
+    try:
+        records = list(parse_fasta(filepath))
+    except FileNotFoundError:
+        print(f"Error: File '{filepath}' not found.", file=sys.stderr)
+        sys.exit(1)
+
+    if not records:
+        print("No valid FASTA sequences found.")
+        sys.exit(0)
+
+    print(f"File: {filepath}")
+    print(f"Total sequences: {len(records)}")
+    print("-" * 65)
+
+    total_len = 0
+    total_gc = 0
+
+    for idx, (header, seq) in enumerate(records, start=1):
+        stats = analyze_sequence(seq)
+        total_len += stats["length"]
+        total_gc += stats["G"] + stats["C"]
+
+        print(f"[{idx}] {header}")
+        print(f"    Length      : {stats['length']:,} bp")
+        print(f"    GC Content  : {stats['gc_percent']:.2f}%")
+        print(
+            f"    Composition : A={stats['A']} ({stats['A']/stats['length']*100:.1f}%), "
+            f"T={stats['T']} ({stats['T']/stats['length']*100:.1f}%), "
+            f"G={stats['G']} ({stats['G']/stats['length']*100:.1f}%), "
+            f"C={stats['C']} ({stats['C']/stats['length']*100:.1f}%)"
+            + (f", Other={stats['Other']}" if stats["Other"] > 0 else "")
+        )
+        print()
+
+    overall_gc = (total_gc / total_len * 100) if total_len > 0 else 0.0
+    print("-" * 65)
+    print(f"Overall Summary: {total_len:,} total bp | Mean GC Content: {overall_gc:.2f}%")
+
+
+if __name__ == "__main__":
+    main()
